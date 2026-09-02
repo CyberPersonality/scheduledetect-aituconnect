@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AITUConnect · Расписание</title>
+<meta name="description" content="Скриншоты пар — в одно расписание. Загрузи скрины, получи готовую картинку.">
+<meta name="theme-color" content="#050A14">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#050A14;
+    --bg-2:#070E1B;
+    --panel:#0C1524;
+    --panel-2:#101B2D;
+    --line:rgba(255,255,255,.09);
+    --line-soft:rgba(255,255,255,.045);
+    --text:#EAF2FB;
+    --muted:#8FA1B8;
+    --dim:#5F708A;
+    --blue:#1F6FEB;
+    --blue-hi:#3B86FF;
+    --cyan:#3EC8F4;
+    --err:#FF6B6B;
+    --ok:#4ADE80;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--blue);color:#fff}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:2px}
+
+  .lbl{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:500}
+  .wrap{max-width:1380px;margin:0 auto;padding:0 clamp(16px,4vw,56px)}
+
+  /* ---------- шапка ---------- */
+  .nav{position:sticky;top:0;z-index:50;background:rgba(5,10,20,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:66px;gap:16px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:18px;letter-spacing:-.2px;white-space:nowrap}
+  .brand i{width:26px;height:26px;border-radius:50%;border:2px solid var(--text);position:relative;display:inline-block;flex:0 0 auto}
+  .brand i::after{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--cyan)}
+  .brand b{font-weight:800}
+  .brand span{font-weight:400;color:var(--muted)}
+  .nav-right{display:flex;align-items:center;gap:10px}
+  .pill{border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+
+  /* ---------- герой ---------- */
+  .hero{position:relative;border-bottom:1px solid var(--line);overflow:hidden}
+  .hero::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:
+      radial-gradient(900px 460px at 76% 12%, rgba(31,111,235,.28), transparent 62%),
+      radial-gradient(620px 400px at 12% 92%, rgba(62,200,244,.10), transparent 66%),
+      linear-gradient(180deg, #071023 0%, var(--bg) 78%);
+  }
+  .hero::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(to right, var(--line-soft) 1px, transparent 1px);
+    background-size:min(25vw,270px) 100%;
+    mask-image:linear-gradient(180deg,transparent,#000 22%,#000 70%,transparent);
+  }
+  .hero .wrap{position:relative;z-index:1;padding-top:26px;padding-bottom:0}
+  .coords{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-bottom:clamp(56px,12vw,120px)}
+  h1{
+    font-size:clamp(38px,8.2vw,92px);line-height:.97;font-weight:800;letter-spacing:-.035em;
+    margin:0 0 22px;max-width:16ch;
+  }
+  h1 u{text-decoration:none;color:var(--cyan)}
+  .hero-b{display:flex;gap:clamp(24px,5vw,80px);align-items:flex-end;flex-wrap:wrap;padding-bottom:34px}
+  .hero-b p{margin:0;max-width:46ch;color:var(--muted);font-size:clamp(15px,1.6vw,18px)}
+  .eyebrow{display:flex;align-items:center;gap:9px;margin-bottom:20px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+  .stat{padding:22px 0 26px;border-right:1px solid var(--line)}
+  .stat:last-child{border-right:0}
+  .stat b{display:block;font-size:clamp(24px,3.4vw,40px);font-weight:700;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat .lbl{margin-top:4px;display:block}
+  .stat + .stat{padding-left:clamp(14px,2.4vw,32px)}
+
+  /* ---------- секции ---------- */
+  section.block{border-bottom:1px solid var(--line);padding:clamp(40px,6vw,76px) 0}
+  .head{display:flex;align-items:baseline;gap:16px;margin-bottom:26px;flex-wrap:wrap}
+  h2{font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-.025em;margin:0}
+  .head p{margin:0;color:var(--muted);font-size:14px;max-width:52ch}
+
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(20px,3vw,42px);align-items:start}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--line);border-radius:16px;padding:clamp(16px,2.4vw,24px)}
+
+  .drop{
+    border:1px dashed rgba(62,200,244,.35);border-radius:16px;background:rgba(31,111,235,.06);
+    padding:clamp(28px,5vw,46px) 20px;text-align:center;cursor:pointer;transition:border-color .18s,background .18s;
+  }
+  .drop:hover,.drop.hot{border-color:var(--cyan);background:rgba(62,200,244,.09)}
+  .drop b{display:block;font-size:clamp(16px,2vw,19px);font-weight:600;margin-bottom:8px}
+  .drop small{color:var(--muted);font-size:13.5px;line-height:1.7}
+
+  .thumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .thumb{position:relative;width:78px;height:106px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#000}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;opacity:.85}
+  .thumb button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(5,10,20,.85);color:#fff;cursor:pointer;font-size:15px;line-height:1}
+
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .btn{
+    font:inherit;font-weight:600;font-size:15px;border:0;border-radius:10px;cursor:pointer;
+    padding:13px 22px;background:var(--blue);color:#fff;display:inline-flex;align-items:center;gap:10px;
+    transition:background .18s,transform .18s;
+  }
+  .btn:hover{background:var(--blue-hi)}
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+  .btn.ghost:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.2)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;background:var(--blue)}
+  .btn .arw{font-size:15px;line-height:1}
+
+  .status{font-size:14px;color:var(--muted);margin:14px 0 0;min-height:22px}
+  .status.err{color:var(--err)}
+  .status.ok{color:var(--ok)}
+  .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(62,200,244,.3);border-top-color:var(--cyan);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px;margin-right:8px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+  label.f{display:grid;gap:6px}
+  label.f > span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  .t{
+    font:inherit;font-size:15px;color:var(--text);background:rgba(255,255,255,.04);
+    border:1px solid var(--line);border-radius:9px;padding:11px 12px;width:100%;
+  }
+  .t:focus{border-color:var(--cyan);outline:none;background:rgba(62,200,244,.06)}
+  select.t{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  select.t option{background:#0C1524;color:var(--text)}
+
+  .day{margin-bottom:22px}
+  .day-h{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .day-h b{font-size:15px;font-weight:600;letter-spacing:.02em}
+  .day-h hr{flex:1;border:0;border-top:1px solid var(--line);margin:0}
+  .day-h .n{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+
+  .lesson{
+    display:grid;grid-template-columns:26px 82px minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr) 30px;
+    gap:10px;align-items:center;background:rgba(255,255,255,.025);border:1px solid var(--line);
+    border-radius:12px;padding:10px 12px;margin-bottom:8px;
+  }
+  .fw{display:block;min-width:0}
+  .fw > span{display:none}
+  .lesson input{
+    font:inherit;font-size:14px;color:var(--text);background:transparent;border:0;
+    border-bottom:1px solid transparent;padding:4px 0;width:100%;min-width:0;
+  }
+  .lesson input::placeholder{color:var(--dim)}
+  .lesson input:focus{outline:none;border-bottom-color:var(--cyan)}
+  .sw{width:24px;height:24px;border-radius:7px;border:1px solid rgba(255,255,255,.16);cursor:pointer;padding:0}
+  .del{border:0;background:transparent;color:var(--dim);cursor:pointer;font-size:19px;line-height:1;padding:4px}
+  .del:hover{color:var(--err)}
+
+  .preview{background:#000;border:1px solid var(--line);border-radius:16px;padding:12px;overflow:auto;-webkit-overflow-scrolling:touch}
+  .preview canvas{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .step{background:var(--bg-2);padding:22px 20px}
+  .step .lbl{display:block;margin-bottom:10px;color:var(--cyan)}
+  .step b{display:block;font-size:16px;font-weight:600;margin-bottom:6px}
+  .step p{margin:0;color:var(--muted);font-size:14px}
+
+  footer{padding:30px 0 50px;color:var(--dim);font-size:13px;line-height:1.8}
+  footer code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;font-size:12.5px;color:var(--muted)}
+
+  @media (max-width:960px){
+    .grid2{grid-template-columns:1fr}
+    .steps{grid-template-columns:1fr}
+    .lesson{grid-template-columns:1fr 1fr;gap:12px;padding:14px}
+    .fw > span{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:2px}
+    .lesson input{border-bottom-color:var(--line)}
+    .lesson .sw{grid-column:1}
+    .lesson .del{grid-column:2;justify-self:end;margin-top:-4px}
+    .lesson .fw.subj{grid-column:1 / -1}
+  }
+  @media (max-width:640px){
+    .stats{grid-template-columns:1fr 1fr}
+    .stat{border-bottom:1px solid var(--line);padding:16px 0 18px}
+    .stat:nth-child(2n){border-right:0}
+    .stat + .stat{padding-left:0}
+    .stat:nth-child(2n){padding-left:clamp(14px,4vw,24px)}
+    .fields{grid-template-columns:1fr}
+    .coords span:nth-child(2){display:none}
+    .btn{width:100%;justify-content:center}
+    .row .btn{flex:1 1 100%}
+    .nav .pill{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <div class="brand"><i></i><b>AITU</b><span>Connect</span></div>
+    <div class="nav-right">
+      <span class="pill"><span class="dot"></span>Расписание / 2026</span>
+      <a class="btn ghost" href="#upload" style="padding:9px 16px;font-size:14px">Загрузить<span class="arw">↗</span></a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="coords">
+      <span class="lbl">AITU Digital Campus / Astana, Expo District</span>
+      <span class="lbl">Расписание занятий / период 1</span>
+    </div>
+
+    <div class="eyebrow"><span class="dot"></span><span class="lbl">Скриншоты в одну картинку</span></div>
+    <h1>Всё расписание группы — <u>в один экран.</u></h1>
+
+    <div class="hero-b">
+      <p>Загрузи скрины пар из приложения университета. Сервис распознает предметы, время, кабинеты и преподавателей и соберёт их в одну картинку, которую можно сохранить в галерею и кинуть в чат группы.</p>
+      <div class="row">
+        <a class="btn" href="#upload">Собрать расписание<span class="arw">↗</span></a>
+        <button class="btn ghost" id="demo">Показать пример</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b id="s-img">0</b><span class="lbl">Скриншотов</span></div>
+      <div class="stat"><b id="s-les">0</b><span class="lbl">Пар распознано</span></div>
+      <div class="stat"><b id="s-day">0</b><span class="lbl">Учебных дней</span></div>
+      <div class="stat"><b>AITU</b><span class="lbl">Создано для кампуса</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="block" id="upload">
+    <div class="wrap">
+      <div class="head">
+        <h2>Загрузка скриншотов</h2>
+        <p>Можно кидать сразу несколько скринов — разные дни склеятся в одно расписание, повторы отсеются.</p>
+      </div>
+      <div class="grid2">
+        <div>
+          <div class="drop" id="drop" tabindex="0" role="button" aria-label="Добавить скриншоты">
+            <b>Перетащи скриншоты сюда</b>
+            <small>или нажми, чтобы выбрать из галереи<br>вставка из буфера — Ctrl+V · PNG, JPG</small>
+          </div>
+          <input type="file" id="file" accept="image/*" multiple hidden>
+          <div class="thumbs" id="thumbs"></div>
+          <div class="row" style="margin-top:18px">
+            <button class="btn" id="parse" disabled>Распознать пары<span class="arw">↗</span></button>
+            <button class="btn ghost" id="clear">Очистить</button>
+          </div>
+          <p class="status" id="status"></p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <span class="lbl">Шаг 01</span>
+            <b>Скрины</b>
+            <p>Открой расписание в приложении и сделай скрины всех дней недели.</p>
+          </div>
+          <div class="step">
+            <span class="lbl">Шаг 02</span>
+            <b>Разбор</b>
+            <p>Нейросеть вытаскивает предмет, время, тип пары, кабинет и преподавателя.</p>
+          </div>
+          <div class="step">
+            <span class="lbl">Шаг 03</span>
+            <b>Картинка</b>
+            <p>Правишь спорные поля и скачиваешь PNG — читается без зума на телефоне.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="editorBox" hidden>
+    <div class="wrap">
+      <div class="head">
+        <h2>Проверка</h2>
+        <p>Обрезанные краем экрана кабинеты и фамилии лучше поправить руками — картинка обновится сразу.</p>
+      </div>
+      <div class="card">
+        <div class="fields">
+          <label class="f"><span>Заголовок</span><input class="t" id="title" value="Расписание занятий"></label>
+          <label class="f"><span>Подзаголовок</span><input class="t" id="subtitle" value="2026–2027 · 1 неделя"></label>
+        </div>
+        <div id="editor"></div>
+        <div class="row"><button class="btn ghost" id="addLesson">+ Добавить пару</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="resultBox" hidden>
+    <div class="wrap">
+      <div class="head">
+        <h2>Готовая картинка</h2>
+        <p>Экспорт в двойном разрешении — не мылит на экране телефона.</p>
+      </div>
+      <div class="card">
+        <div class="fields">
+          <label class="f"><span>Тема</span>
+            <select class="t" id="theme">
+              <option value="night">Тёмная</option>
+              <option value="paper">Светлая</option>
+            </select>
+          </label>
+          <label class="f"><span>Раскладка</span>
+            <select class="t" id="cols">
+              <option value="0">Все дни в один ряд</option>
+              <option value="3">По 3 дня в ряд</option>
+              <option value="2">По 2 дня в ряд</option>
+              <option value="1">Одна колонка (сторис)</option>
+            </select>
+          </label>
+        </div>
+        <div class="preview"><canvas id="canvas"></canvas></div>
+        <div class="row" style="margin-top:18px">
+          <button class="btn" id="download">Скачать PNG<span class="arw">↓</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Ключ к нейросети хранится на стороне сервиса — студенту вводить ничего не нужно. Настройка в <code>CONFIG</code> в начале скрипта, инструкция в <code>README.md</code>.</p>
+    <p>Картинки никуда не сохраняются: они живут только во вкладке браузера.</p>
+  </div>
+</footer>
+
+<script>
+/* ==========================================================================
+   CONFIG — единственное место, которое меняешь при деплое
+   ========================================================================== */
+const CONFIG = {
+  // 'proxy'  — запросы идут на Cloudflare Worker, ключ спрятан на сервере (рекомендуется)
+  // 'direct' — ключ лежит прямо здесь, в открытом коде
+  // 'off'    — без нейросети, только ручной ввод
+  mode: 'proxy',
+  proxyUrl: 'https://aituconnect-ai.ТВОЙ-АККАУНТ.workers.dev',
+  apiKey: '',
+  model: 'gemini-flash-latest'
+};
+/* ========================================================================== */
+
+const DAYS = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+const PALETTE = ['#3EC8F4','#6EE7B7','#FBBF24','#F472B6','#A78BFA','#FB923C','#4ADE80','#60A5FA'];
+
+const state = { images: [], lessons: [], busy: false };
+const $ = id => document.getElementById(id);
+const els = {
+  drop:$('drop'), file:$('file'), thumbs:$('thumbs'), parse:$('parse'), demo:$('demo'),
+  clear:$('clear'), status:$('status'), editorBox:$('editorBox'), editor:$('editor'),
+  resultBox:$('resultBox'), canvas:$('canvas'), download:$('download'), theme:$('theme'),
+  cols:$('cols'), title:$('title'), subtitle:$('subtitle'), addLesson:$('addLesson'),
+  sImg:$('s-img'), sLes:$('s-les'), sDay:$('s-day')
+};
+
+const uid = () => Math.random().toString(36).slice(2, 9);
+const esc = s => (s == null ? '' : String(s));
+
+function colorFor(subject){
+  let h = 0; const s = esc(subject).toLowerCase();
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return PALETTE[h % PALETTE.length];
+}
+function normTime(t){
+  const m = esc(t).match(/(\d{1,2})[:.](\d{2})/);
+  return m ? String(m[1]).padStart(2,'0') + ':' + m[2] : esc(t).trim();
+}
+function dayIndex(v){
+  if (typeof v === 'number' && v >= 1 && v <= 7) return v;
+  const s = esc(v).toLowerCase().trim();
+  const i = DAYS.findIndex(d => s.startsWith(d.toLowerCase().slice(0,4)));
+  if (i >= 0) return i + 1;
+  const n = parseInt(s, 10);
+  return (n >= 1 && n <= 7) ? n : 1;
+}
+function setStatus(html, kind){
+  els.status.innerHTML = html || '';
+  els.status.className = 'status' + (kind ? ' ' + kind : '');
+}
+function updateStats(){
+  els.sImg.textContent = state.images.length;
+  els.sLes.textContent = state.lessons.length;
+  els.sDay.textContent = new Set(state.lessons.map(l => l.day)).size;
+}
+
+/* ---------- загрузка ---------- */
+els.drop.addEventListener('click', () => els.file.click());
+els.drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); els.file.click(); } });
+els.file.addEventListener('change', e => { addFiles(e.target.files); els.file.value = ''; });
+['dragenter','dragover'].forEach(ev => els.drop.addEventListener(ev, e => { e.preventDefault(); els.drop.classList.add('hot'); }));
+['dragleave','drop'].forEach(ev => els.drop.addEventListener(ev, e => { e.preventDefault(); els.drop.classList.remove('hot'); }));
+els.drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
+window.addEventListener('paste', e => {
+  const files = [...(e.clipboardData?.files || [])];
+  if (files.length) addFiles(files);
+});
+
+async function addFiles(list){
+  const files = [...list].filter(f => f.type.startsWith('image/'));
+  if (!files.length) return;
+  for (const f of files){
+    try {
+      const shrunk = await shrink(f);
+      state.images.push({ id: uid(), ...shrunk });
+    } catch { setStatus('Файл ' + f.name + ' прочитать не удалось.', 'err'); }
+  }
+  renderThumbs();
+}
+
+function shrink(file){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const max = 1400, k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      const dataUrl = c.toDataURL('image/jpeg', 0.85);
+      resolve({ dataUrl, base64: dataUrl.split(',')[1] });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('bad image')); };
+    img.src = url;
+  });
+}
+
+function renderThumbs(){
+  els.thumbs.innerHTML = '';
+  state.images.forEach(im => {
+    const d = document.createElement('div'); d.className = 'thumb';
+    const img = document.createElement('img'); img.src = im.dataUrl; img.alt = 'скриншот расписания';
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = '×'; b.title = 'Убрать';
+    b.onclick = () => { state.images = state.images.filter(x => x.id !== im.id); renderThumbs(); };
+    d.append(img, b); els.thumbs.append(d);
+  });
+  els.parse.disabled = state.images.length === 0 || state.busy;
+  updateStats();
+}
+
+/* ---------- разбор ---------- */
+const PROMPT = `Ты разбираешь скриншоты расписания занятий казахстанского университета (интерфейс на русском).
+Верни ТОЛЬКО JSON-массив пар, без пояснений и без markdown.
+
+Формат одного элемента:
+{"day":"Среда","start":"10:00","end":"10:50","subject":"Системы управления базами данных","type":"Практика","teacher":"Қызырқанов А.Е.","room":"309К","code":"DMS52-EN-P94"}
+
+Правила:
+- day — название дня недели из скриншота.
+- start/end — время начала и конца пары, формат HH:MM.
+- subject — крупная строка с названием предмета.
+- type: "Лекция" для «Лекции», "Практика" для «Практические занятия», "Лаба" для лабораторных, иначе как на скрине.
+- teacher — фамилия и инициалы преподавателя.
+- room — кабинет и корпус. Если текст обрезан краем экрана, напиши то, что видно.
+- code — служебный код пары (например DMS52-EN-P94), если он есть.
+- Если поля не видно — пустая строка "".
+- Обработай ВСЕ скриншоты и верни все пары одним массивом. Обрезанную карточку без названия предмета пропусти.`;
+
+async function callAI(images){
+  const body = {
+    contents: [{ role:'user', parts:[
+      { text: PROMPT },
+      ...images.map(im => ({ inline_data:{ mime_type:'image/jpeg', data: im.base64 } }))
+    ]}],
+    generationConfig: { temperature: 0, responseMimeType: 'application/json' }
+  };
+
+  let url, headers = { 'Content-Type':'application/json' };
+  if (CONFIG.mode === 'proxy'){
+    url = CONFIG.proxyUrl;
+  } else if (CONFIG.mode === 'direct' && CONFIG.apiKey){
+    url = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.model}:generateContent`;
+    headers['x-goog-api-key'] = CONFIG.apiKey;
+  } else {
+    throw new Error('Распознавание пока не подключено. Добавь пары вручную кнопкой «Добавить пару».');
+  }
+
+  const res = await fetch(url, { method:'POST', headers, body: JSON.stringify(body) });
+  if (!res.ok){
+    const text = await res.text().catch(() => '');
+    throw new Error('Сервис распознавания ответил ошибкой ' + res.status + '. ' + text.slice(0, 140));
+  }
+  const data = await res.json();
+  const raw = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
+  return parseLessons(raw);
+}
+
+function parseLessons(raw){
+  let text = esc(raw).trim().replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+  const a = text.indexOf('['), b = text.lastIndexOf(']');
+  if (a >= 0 && b > a) text = text.slice(a, b + 1);
+  let arr;
+  try { arr = JSON.parse(text); }
+  catch { throw new Error('Ответ нейросети прочитать не вышло. Попробуй ещё раз или добавь пары вручную.'); }
+  if (!Array.isArray(arr)) throw new Error('Пары на скриншотах не найдены.');
+  return arr.map(x => ({
+    id: uid(), day: dayIndex(x.day), start: normTime(x.start), end: normTime(x.end),
+    subject: esc(x.subject).trim(), type: esc(x.type).trim(), teacher: esc(x.teacher).trim(),
+    room: esc(x.room).trim(), code: esc(x.code).trim(), color: colorFor(x.subject)
+  })).filter(l => l.subject);
+}
+
+function mergeLessons(incoming){
+  const seen = new Set(state.lessons.map(l => l.day + '|' + l.start + '|' + l.subject.toLowerCase()));
+  incoming.forEach(l => {
+    const key = l.day + '|' + l.start + '|' + l.subject.toLowerCase();
+    if (!seen.has(key)){ seen.add(key); state.lessons.push(l); }
+  });
+  sortLessons();
+}
+const sortLessons = () => state.lessons.sort((a,b) => a.day - b.day || a.start.localeCompare(b.start));
+
+els.parse.addEventListener('click', async () => {
+  if (!state.images.length || state.busy) return;
+  state.busy = true; els.parse.disabled = true;
+  setStatus('<span class="spin"></span>Читаю скриншоты — несколько секунд');
+  try {
+    const found = await callAI(state.images);
+    const before = state.lessons.length;
+    mergeLessons(found);
+    const added = state.lessons.length - before;
+    setStatus(added ? `Добавлено пар: ${added}. Проверь поля ниже.` : 'Новых пар нет — эти скрины уже разобраны.', 'ok');
+    refresh();
+    els.editorBox.scrollIntoView({ behavior:'smooth', block:'start' });
+  } catch (err){
+    setStatus(err.message, 'err');
+    els.editorBox.hidden = false;
+  } finally {
+    state.busy = false; els.parse.disabled = state.images.length === 0;
+  }
+});
+
+els.demo.addEventListener('click', () => {
+  const demo = [
+    { day:3, start:'10:00', end:'10:50', subject:'Системы управления базами данных', type:'Практика', teacher:'Қызырқанов А.Е.', room:'309К · Көркем', code:'DMS52-EN-P94' },
+    { day:3, start:'11:00', end:'11:50', subject:'Компьютерные сети', type:'Практика', teacher:'Кажыбаев О.Х.', room:'107К · Көркем', code:'CNC53-EN-P390' },
+    { day:3, start:'12:00', end:'12:50', subject:'Операционные системы', type:'Практика', teacher:'Кулбаева Л.Н.', room:'207К · Көркем', code:'OS52-EN-P61' },
+    { day:4, start:'08:00', end:'08:50', subject:'Системы управления базами данных', type:'Лекция', teacher:'Нургалиева С.А.', room:'Онлайн', code:'DMS52-EN-L6' }
+  ].map(l => ({ id: uid(), ...l, color: colorFor(l.subject) }));
+  mergeLessons(demo);
+  setStatus('Загружен пример из приложения университета.', 'ok');
+  refresh();
+  els.resultBox.scrollIntoView({ behavior:'smooth', block:'start' });
+});
+
+els.clear.addEventListener('click', () => {
+  state.images = []; state.lessons = [];
+  renderThumbs(); refresh(); setStatus('');
+});
+
+/* ---------- редактор ---------- */
+els.addLesson.addEventListener('click', () => {
+  state.lessons.push({ id:uid(), day:1, start:'09:00', end:'09:50', subject:'Новый предмет', type:'Лекция', teacher:'', room:'', code:'', color:colorFor('Новый предмет') });
+  sortLessons(); refresh();
+});
+
+function field(lesson, key, label, cls){
+  const w = document.createElement('label');
+  w.className = 'fw' + (cls ? ' ' + cls : '');
+  const s = document.createElement('span'); s.textContent = label;
+  const i = document.createElement('input');
+  i.value = lesson[key] || ''; i.placeholder = label; i.setAttribute('aria-label', label);
+  i.addEventListener('input', () => { lesson[key] = i.value; draw(); });
+  if (key === 'start' || key === 'end'){
+    i.addEventListener('change', () => { lesson[key] = normTime(i.value); sortLessons(); refresh(); });
+  }
+  w.append(s, i);
+  return w;
+}
+
+function renderEditor(){
+  els.editor.innerHTML = '';
+  for (let d = 1; d <= 7; d++){
+    const items = state.lessons.filter(l => l.day === d);
+    if (!items.length) continue;
+    const box = document.createElement('div'); box.className = 'day';
+    const h = document.createElement('div'); h.className = 'day-h';
+    const b = document.createElement('b'); b.textContent = DAYS[d-1];
+    const hr = document.createElement('hr');
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = items.length + ' пар.';
+    h.append(b, hr, n); box.append(h);
+
+    items.forEach(l => {
+      const row = document.createElement('div'); row.className = 'lesson';
+      const sw = document.createElement('button');
+      sw.className = 'sw'; sw.type = 'button'; sw.style.background = l.color; sw.title = 'Сменить цвет';
+      sw.onclick = () => { l.color = PALETTE[(PALETTE.indexOf(l.color) + 1) % PALETTE.length]; sw.style.background = l.color; draw(); };
+      const del = document.createElement('button');
+      del.className = 'del'; del.type = 'button'; del.textContent = '×'; del.title = 'Удалить пару';
+      del.onclick = () => { state.lessons = state.lessons.filter(x => x.id !== l.id); refresh(); };
+      row.append(sw, field(l,'start','Начало'), field(l,'subject','Предмет','subj'),
+                 field(l,'type','Тип'), field(l,'room','Кабинет'), field(l,'teacher','Преподаватель'), del);
+      box.append(row);
+    });
+    els.editor.append(box);
+  }
+}
+
+function refresh(){
+  const has = state.lessons.length > 0;
+  els.editorBox.hidden = !has;
+  els.resultBox.hidden = !has;
+  renderEditor(); updateStats(); draw();
+}
+
+/* ---------- картинка ---------- */
+const THEMES = {
+  night: { bg:'#070E1B', card:'#0E1828', border:'#1D2B41', ink:'#EAF2FB', ink2:'#94A7BE', ink3:'#65788F', rule:'#1D2B41', accent:'#3EC8F4' },
+  paper: { bg:'#F4F6FA', card:'#FFFFFF', border:'#E1E6EE', ink:'#0B1220', ink2:'#5A6A80', ink3:'#8B98AA', rule:'#DCE2EB', accent:'#1F6FEB' }
+};
+const F = {
+  title: w => `${w} 34px Inter, system-ui, sans-serif`,
+  day:   w => `${w} 19px Inter, system-ui, sans-serif`,
+  sub:   w => `${w} 15px Inter, system-ui, sans-serif`,
+  time:  w => `${w} 14px Inter, system-ui, sans-serif`,
+  subj:  w => `${w} 17px Inter, system-ui, sans-serif`,
+  meta:  w => `${w} 13px Inter, system-ui, sans-serif`
+};
+
+function wrap(ctx, text, maxWidth){
+  const words = esc(text).split(/\s+/).filter(Boolean);
+  const lines = []; let line = '';
+  for (const w of words){
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxWidth && line){ lines.push(line); line = w; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function rr(ctx, x, y, w, h, r){
+  ctx.beginPath(); ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function layoutCard(ctx, l, w){
+  const padX = 16, barW = 5, inner = w - padX * 2 - barW;
+  ctx.font = F.subj(600);
+  const subjLines = wrap(ctx, l.subject, inner);
+  ctx.font = F.meta(400);
+  const metaText = [l.type, l.room].filter(Boolean).join('  ·  ');
+  const metaLines = metaText ? wrap(ctx, metaText, inner) : [];
+  const teacherLines = l.teacher ? wrap(ctx, l.teacher, inner) : [];
+  const h = 14 + 18 + 6 + subjLines.length * 23
+          + (metaLines.length ? 6 + metaLines.length * 18 : 0)
+          + (teacherLines.length ? teacherLines.length * 18 : 0) + 14;
+  return { subjLines, metaLines, teacherLines, h, padX, barW };
+}
+function drawCard(ctx, l, x, y, w, t){
+  const L = layoutCard(ctx, l, w);
+  ctx.fillStyle = t.card; ctx.strokeStyle = t.border; ctx.lineWidth = 1;
+  rr(ctx, x, y, w, L.h, 12); ctx.fill(); ctx.stroke();
+  ctx.save(); rr(ctx, x, y, w, L.h, 12); ctx.clip();
+  ctx.fillStyle = l.color; ctx.fillRect(x, y, L.barW, L.h); ctx.restore();
+
+  let cy = y + 14; const cx = x + L.barW + L.padX;
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = l.color; ctx.font = F.time(600);
+  ctx.fillText([l.start, l.end].filter(Boolean).join(' – '), cx, cy);
+  cy += 24;
+  ctx.fillStyle = t.ink; ctx.font = F.subj(600);
+  L.subjLines.forEach(line => { ctx.fillText(line, cx, cy); cy += 23; });
+  if (L.metaLines.length){
+    cy += 6; ctx.fillStyle = t.ink2; ctx.font = F.meta(500);
+    L.metaLines.forEach(line => { ctx.fillText(line, cx, cy); cy += 18; });
+  }
+  if (L.teacherLines.length){
+    ctx.fillStyle = t.ink3; ctx.font = F.meta(400);
+    L.teacherLines.forEach(line => { ctx.fillText(line, cx, cy); cy += 18; });
+  }
+  return L.h;
+}
+
+function draw(){
+  const canvas = els.canvas, ctx = canvas.getContext('2d');
+  const t = THEMES[els.theme.value] || THEMES.night;
+
+  const days = [];
+  for (let d = 1; d <= 7; d++){
+    const items = state.lessons.filter(l => l.day === d).sort((a,b) => a.start.localeCompare(b.start));
+    if (items.length) days.push({ d, items });
+  }
+
+  const S = 2, PAD = 40, COLW = 300, GAP = 16, CARD_GAP = 10;
+  const perRow = days.length ? (parseInt(els.cols.value, 10) || days.length) : 1;
+  const headH = 118;
+
+  const measure = document.createElement('canvas').getContext('2d');
+  const rows = [];
+  for (let i = 0; i < days.length; i += perRow) rows.push(days.slice(i, i + perRow));
+  const rowHeights = rows.map(row => Math.max(...row.map(col => {
+    let h = 44;
+    col.items.forEach(l => { h += layoutCard(measure, l, COLW).h + CARD_GAP; });
+    return h;
+  })));
+
+  const colsWide = Math.min(perRow, days.length) || 1;
+  const W = PAD * 2 + colsWide * COLW + (colsWide - 1) * GAP;
+  const H = Math.max(headH + rowHeights.reduce((a,b) => a + b + 26, 0) + PAD, 280);
+
+  canvas.width = Math.round(W * S);
+  canvas.height = Math.round(H * S);
+  canvas.style.width = W + 'px';
+  ctx.setTransform(S, 0, 0, S, 0, 0);
+  ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
+  ctx.textBaseline = 'top';
+
+  // шапка картинки
+  ctx.fillStyle = t.accent;
+  ctx.beginPath(); ctx.arc(PAD + 4, 40, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.font = F.meta(600); ctx.fillText('AITUCONNECT', PAD + 16, 32);
+  ctx.fillStyle = t.ink; ctx.font = F.title(700);
+  ctx.fillText(els.title.value || 'Расписание занятий', PAD, 54);
+  ctx.fillStyle = t.ink2; ctx.font = F.sub(400);
+  ctx.fillText(els.subtitle.value || '', PAD, 94);
+  ctx.strokeStyle = t.rule; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD, headH - 12.5); ctx.lineTo(W - PAD, headH - 12.5); ctx.stroke();
+
+  if (!days.length){
+    ctx.fillStyle = t.ink3; ctx.font = F.sub(400);
+    ctx.fillText('Пар пока нет — загрузи скриншоты или добавь пару вручную.', PAD, headH + 14);
+    return;
+  }
+
+  let y = headH;
+  rows.forEach((row, ri) => {
+    row.forEach((col, ci) => {
+      const x = PAD + ci * (COLW + GAP);
+      let cy = y;
+      ctx.fillStyle = t.ink; ctx.font = F.day(600);
+      ctx.fillText(DAYS[col.d - 1], x, cy);
+      cy += 27;
+      ctx.strokeStyle = t.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, cy + .5); ctx.lineTo(x + COLW, cy + .5); ctx.stroke();
+      cy += 17;
+      col.items.forEach(l => { cy += drawCard(ctx, l, x, cy, COLW, t) + CARD_GAP; });
+    });
+    y += rowHeights[ri] + 26;
+  });
+}
+
+['theme','cols'].forEach(id => els[id].addEventListener('change', draw));
+['title','subtitle'].forEach(id => els[id].addEventListener('input', draw));
+
+els.download.addEventListener('click', () => {
+  els.canvas.toBlob(blob => {
+    if (!blob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'raspisanie.png';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }, 'image/png');
+});
+
+if (CONFIG.mode === 'off') setStatus('Распознавание выключено — собери расписание кнопкой «Добавить пару».');
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+refresh();
+</script>
+</body>
+</html>
